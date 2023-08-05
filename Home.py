@@ -7,8 +7,8 @@ from pathlib import Path
 st.title('My Doggy Revenue')
 
 # Load existing data or create a new DataFrame
-output_data_path = Path('data/input_data.csv')
-if output_data_path.is_file():
+DATA_PATH = Path('data/input_data.csv')
+if DATA_PATH.is_file():
     historic_df = pd.read_csv('data/input_data.csv', parse_dates=['date','Start Date', 'End Date'])
 else: 
     historic_df = pd.DataFrame(columns=['date','Dog Name', 'Start Date', 'End Date', 'Net App Income', 'Cash Income','Total Income'])
