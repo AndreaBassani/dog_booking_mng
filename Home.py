@@ -38,7 +38,7 @@ if submitted:
     }
     df = pd.DataFrame(new_data)
     df['Start Date'] = pd.to_datetime(df['Start Date'])
-    df['End Date'] = pd.to_datetime(df['End Date'])
+    df['End Date'] = pd.to_datetime(df['End Date']) + pd.DateOffset(hours=23,minutes=59)
     historic_df = pd.concat([historic_df, df], ignore_index=True)
     # Save the updated DataFrame to CSV
     historic_df.to_csv('data/input_data.csv', index=False)
@@ -47,15 +47,19 @@ if submitted:
 
 
 if historic_df.shape[0]>0:
+    
+    historic_df.sort_values(by=['Start Date'], inplace=True)
 
     fig = px.timeline(historic_df.sort_values(by=['Start Date']), x_start='Start Date', x_end='End Date', y='Dog Name', color='Dog Name', text='Total Income')
+    fig.add_vline(x=dt.date.today(), line_width=1, line_color="red", line_dash="dot")
     fig.update_layout(
     font=dict(
         family="Arial, sans-serif",
         size=15,  # Set the font size here
-    )
+    ),
+    yaxis_title=None
 )
-    st.plotly_chart(fig)
+    st.plotly_chart(fig, use_container_width=True)
 
 if "data" not in st.session_state:
     st.session_state.data = historic_df
