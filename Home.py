@@ -3,6 +3,8 @@ import streamlit as st
 import datetime as dt
 import plotly.express as px
 from pathlib import Path
+import time
+from PIL import Image
 
 st.title('My Doggy Revenue')
 
@@ -13,19 +15,37 @@ if DATA_PATH.is_file():
 else: 
     historic_df = pd.DataFrame(columns=['date','Dog Name', 'Start Date', 'End Date', 'Net App Income', 'Cash Income','Total Income'])
 
+with st.sidebar:
+    st.markdown(r'''
+    <style>
+        [data-testid="stForm"] {border: 0px}
+        [data-testid=stSidebar] [data-testid=stImage]{
+            text-align: center;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 100%;
+        }
+    </style>
+    ''', unsafe_allow_html=True)
+    
+    image = Image.open("cute-dog-transparent-background-free-png.webp")
 
-with st.form('add_dog_form'):
-    dog_name = st.text_input("Enter dog's name")
-    next_week = dt.date.today() + dt.timedelta(days=7)
-    jan_1 = dt.date(dt.date.today().year, 1, 1)
-    dec_31 = dt.date(dt.date.today().year + 1, 12, 31)
-    date_booked = st.date_input('Select date range:', (dt.date.today(), next_week), jan_1, dec_31)
-    net_app_income_input = st.number_input('Net App Income:', value=0.0, step=0.01)
-    cash_income_input = st.number_input('Cash Income:', value=0.0, step=0.01)
-    submitted = st.form_submit_button('Submit')
+    st.image(image, width=80, )
+    with st.form('add_dog_form'):
+        dog_name = st.text_input("Enter dog's name")
+        next_week = dt.date.today() + dt.timedelta(days=7)
+        jan_1 = dt.date(dt.date.today().year, 1, 1)
+        dec_31 = dt.date(dt.date.today().year + 1, 12, 31)
+        date_booked = st.date_input('Select date range:', (dt.date.today(), next_week), jan_1, dec_31)
+        net_app_income_input = st.number_input('Net App Income:', value=0.0, step=0.01)
+        cash_income_input = st.number_input('Cash Income:', value=0.0, step=0.01)
+        submitted = st.form_submit_button('Submit')
 
 if submitted:
-
+    time.sleep(.5)
+    st.toast('Dog added!', icon='🎉')
+    st.balloons()
     # Append the new data to the existing DataFrame
     new_data = {
         'date': dt.date.today(),
@@ -77,21 +97,25 @@ def callback():
         st.session_state["data"].drop(rows_to_delete, axis=0).reset_index(drop=True)
     )
 
+with st.expander("Ammend Dataframe"):
+    
+    st.warning('Deliting an entry is permament and irrevertible!', icon="⚠️")
+    st.markdown('**Note:** To delete a row, check the box in the first column.')
 
-columns = st.session_state["data"].columns
-column_config = {column: st.column_config.Column(disabled=True) for column in columns}
+    columns = st.session_state["data"].columns  # Get the columns from the DataFrame
+    column_config = {column: st.column_config.Column(disabled=True) for column in columns}
 
-modified_df = st.session_state["data"].copy()
-modified_df["Delete Row"] = False
-# Make Delete be the first column
-modified_df = modified_df[["Delete Row"] + modified_df.columns[:-1].tolist()]
+    modified_df = st.session_state["data"].copy()
+    modified_df["Delete Row"] = False
+    # Make Delete be the first column
+    modified_df = modified_df[["Delete Row"] + modified_df.columns[:-1].tolist()]
 
-historic_df = st.data_editor(
-    modified_df,
-    key="data_editor",
-    on_change=callback,
-    hide_index=True,
-    column_config=column_config,
-)
-historic_df.drop(["Delete Row"], axis=1, inplace=True)
-historic_df.to_csv('data/input_data.csv', index=False)
+    historic_df = st.data_editor(
+        modified_df,
+        key="data_editor",
+        on_change=callback,
+        hide_index=True,
+        column_config=column_config,
+    )
+    historic_df.drop(["Delete Row"], axis=1, inplace=True)
+    historic_df.to_csv('data/input_data.csv', index=False)
