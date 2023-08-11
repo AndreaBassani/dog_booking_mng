@@ -74,11 +74,14 @@ if historic_df.shape[0]>0:
     fig.add_vline(x=dt.date.today(), line_width=1, line_color="red", line_dash="dot")
     fig.update_layout(
     font=dict(
-        family="Arial, sans-serif",
+        family="Arial Black",
         size=15,  # Set the font size here
     ),
-    yaxis_title=None
-)
+    font_color="#6a3e36",
+    yaxis_title=None,
+    showlegend=False
+    )
+
     st.plotly_chart(fig, use_container_width=True)
 
 if "data" not in st.session_state:
